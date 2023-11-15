@@ -64,8 +64,8 @@ def find_nash_solution(pareto_df):
 def find_compromise_solution(pareto_df):
   pareto_df['sum'] = pareto_df.sum(axis = 1)
   min = pareto_df['sum'].min()
-  index = df.loc[df['sum'] == min].index[0]
-  df.pop(pareto_df.columns[-1])
+  index = pareto_df.loc[pareto_df['sum'] == min].index[0]
+  pareto_df.pop(pareto_df.columns[-1])
   compromise_solution = pareto_df.iloc[index]
   return compromise_solution
 
@@ -141,8 +141,11 @@ def visualize_data(df):
   #Escala do grafico
   plt.figure(figsize=(10, 6))
 
+  #Aplicação da fronteira de pareto
+  df_pareto = find_pareto_frontier(df)
+  print(df_pareto)
   #Printa as soluções ótimas
-  plt.scatter(df[columns_name[0]], df[columns_name[1]], color='silver', label='Pareto Frontier', edgecolor='black')
+  plt.scatter(df_pareto[columns_name[0]], df_pareto[columns_name[1]], color='silver', label='Pareto Frontier', edgecolor='black')
 
   #Determinando ponto desacordo e utopico
   plt.scatter(100, 100, color='red', label='Disagreement Point')
@@ -152,11 +155,11 @@ def visualize_data(df):
   is_minimization = [True] * cols
 
   #Soluções
-  p2 = compute_l2_norm(df)
-  equality = find_equality_solution(df)
-  nash = find_nash_solution(df)
-  compromise = find_compromise_solution(df)
-  topsis = apply_topsis(df, is_minimization)
+  p2 = compute_l2_norm(df_pareto)
+  equality = find_equality_solution(df_pareto)
+  nash = find_nash_solution(df_pareto)
+  compromise = find_compromise_solution(df_pareto)
+  topsis = apply_topsis(df_pareto, is_minimization)
 
   #Verifica se são apenas dois criterios
   if cols == 2:
@@ -168,7 +171,7 @@ def visualize_data(df):
       [topsis.iloc[0], topsis.iloc[1]]
     ]
 
-    index = verify_option_index(df, SOLUTIONS)
+    index = verify_option_index(df_pareto, SOLUTIONS)
 
     #Cria as cordenadas do grafico
     create_scatter(plt, SOLUTIONS)
@@ -196,12 +199,24 @@ def visualize_data(df):
   index_solutions = create_concat_index([p2, equality, nash, compromise, topsis], columns_name)
 
   #Acha os valores dentro do dataFrame normalizado
-  index = verify_option_index(df, index_solutions)
+  index = verify_option_index(df_pareto, index_solutions)
 
   return {'index':index, 'parallel': SOLUTIONS_PARALLEL}
 
 #Transforma o excel em um DataFrame
 dataFrame = pd.read_excel('./tcc.xlsx', engine='openpyxl')
+
+columns_name = list(dataFrame.columns)
+
+plt.figure(figsize=(10, 6))
+plt.scatter(dataFrame[columns_name[0]], dataFrame[columns_name[1]], color='silver', label='Pareto Frontier', edgecolor='black')
+plt.xlabel(columns_name[0])
+plt.ylabel(columns_name[1])
+plt.legend()
+plt.title('Pareto Frontier')
+plt.grid(True)
+plt.show()
+
 #Normaliza os dados na escala de 0 - 100
 df = min_max_normalization(dataFrame, scale_factor=100)
 
