@@ -138,12 +138,22 @@ def visualize_data(df):
   #Extrai os nomes das colunas de criterios
   columns_name = list(df.columns)
 
+  #Aplicação da fronteira de pareto
+  df_pareto = find_pareto_frontier(df)
+  columns_name_pareto = list(df_pareto.columns)
+
+  plt.figure(figsize=(10, 6))
+  plt.scatter(df_pareto[columns_name_pareto[0]], df_pareto[columns_name_pareto[1]], color='silver', label='Pareto Frontier', edgecolor='black')
+  plt.xlabel(columns_name_pareto[0])
+  plt.ylabel(columns_name_pareto[1])
+  plt.legend()
+  plt.title('Pareto Frontier')
+  plt.grid(True)
+  plt.show()
+
   #Escala do grafico
   plt.figure(figsize=(10, 6))
 
-  #Aplicação da fronteira de pareto
-  df_pareto = find_pareto_frontier(df)
-  print(df_pareto)
   #Printa as soluções ótimas
   plt.scatter(df_pareto[columns_name[0]], df_pareto[columns_name[1]], color='silver', label='Pareto Frontier', edgecolor='black')
 
@@ -171,7 +181,7 @@ def visualize_data(df):
       [topsis.iloc[0], topsis.iloc[1]]
     ]
 
-    index = verify_option_index(df_pareto, SOLUTIONS)
+    index = verify_option_index(df, SOLUTIONS)
 
     #Cria as cordenadas do grafico
     create_scatter(plt, SOLUTIONS)
@@ -199,7 +209,7 @@ def visualize_data(df):
   index_solutions = create_concat_index([p2, equality, nash, compromise, topsis], columns_name)
 
   #Acha os valores dentro do dataFrame normalizado
-  index = verify_option_index(df_pareto, index_solutions)
+  index = verify_option_index(df, index_solutions)
 
   return {'index':index, 'parallel': SOLUTIONS_PARALLEL}
 
@@ -209,11 +219,11 @@ dataFrame = pd.read_excel('./tcc.xlsx', engine='openpyxl')
 columns_name = list(dataFrame.columns)
 
 plt.figure(figsize=(10, 6))
-plt.scatter(dataFrame[columns_name[0]], dataFrame[columns_name[1]], color='silver', label='Pareto Frontier', edgecolor='black')
+plt.scatter(dataFrame[columns_name[0]], dataFrame[columns_name[1]], color='silver', label='Data Without Normalization', edgecolor='black')
 plt.xlabel(columns_name[0])
 plt.ylabel(columns_name[1])
 plt.legend()
-plt.title('Pareto Frontier')
+plt.title('Data Without Normalization')
 plt.grid(True)
 plt.show()
 
